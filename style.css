@@ -1,0 +1,30 @@
+.Collage {
+	/* define how much padding you want in between your images */
+    padding: 10px;
+	background-color: #1a509a;
+}
+
+.Collage img {
+    /* ensures padding at the bottom of the image is correct */
+    vertical-align: bottom;
+	cursor: pointer;
+	border: 4px #4ba2f2 solid;
+	background-color: #ffffff;
+
+    /* hide the images until the plugin has run. the plugin will reveal the images*/
+    opacity: 0;
+}
+
+#popup {
+	position: absolute;
+	background-color: rgba(75, 162, 242, 1.0);
+	font-size: small;
+	padding: 20px;
+	width: auto;
+	max-width: 33%;
+	margin: 20px auto;
+	text-align: center;
+	font-family: Helvetica, Arial, Sans-Serif;
+	display: none;
+}
+

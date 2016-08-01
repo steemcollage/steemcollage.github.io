@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="description" content="Real-time collage of new Steemit stories.">
+<title>SteemCollage by @pabitel (beta)</title>
+
+<link href="style.css" rel="stylesheet" type="text/css" />
+<link href="lib/transitions.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="lib/jquery.min.js"></script>
+<script type="text/javascript" src="lib/jquery.collagePlus.min.js"></script>
+<script type="text/javascript" src="lib/spin.min.js"></script>
+<script type="text/javascript" src="lib/steem.min.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+"use strict";
+var spinner;
+var index = '/created';
+var resizeTimer;
+var keys = [];
+var stopped = false;
+var added = 0;
+var loaded = 0;
+var timer;
+
+function collage() {
+	$('.Collage').collagePlus({
+		'effect' : 'default',
+		'targetHeight' : window.innerHeight / 4.25,
+//		'allowPartialLastRow' : true
+	});
+	$('.Collage').css("opacity", 100);
+}
+
+function parameters() {
+	var paramList = {};
+	var parts;
+	var nv;
+	
+	if (location.search) {
+		parts = location.search.substring(1).split('&');
+		for (var i = 0; i < parts.length; i++) {
+			var nv = parts[i].split('=');
+			if (!nv[0]) {
+				continue;
+			}
+			paramList[nv[0]] = nv[1] || true;
+		}
+	}
+	
+	return paramList;
+}
+
+function strip(str) {
+	return $("<p>").html(str).text().replace(/(?:https?|ftp):\/\/[\n\S]+/g, '');
+}
+
+function check() {
+	var key;
+	
+	steem.getState(index, function(err, result) {
+		stopped = false;
+		for (key in result.content) {
+			if (keys.indexOf(key) == -1) {
+				addStory(key, result.content);
+			}
+		}
+	});
+	
+	if (loaded > 0) {
+		clearInterval(timer);
+		start();
+	}
+}
+
+function start() {
+	spinner.stop();
+	collage();
+	
+	added = loaded = 0;
+	
+	timer = setInterval(check, 30000);
+}
+
+function addStory(key, content) {
+	var obj;
+	var img;
+	var first;
+	var left;
+	
+	try {
+		obj = JSON.parse(content[key]['json_metadata']);
+	} catch(e) {}
+	if (obj && obj.image) {
+		added++;
+		img = $("<img />").attr('src', obj.image[0])
+			.on('load', {key: key}, function(event) {
+				if (!stopped && this.complete && typeof this.naturalWidth != "undefined" && this.naturalWidth != 0) {
+					first = $('.Collage').find('img:first');
+					if (first.length == 0) {
+						$('.Collage').append(this);
+					} else {
+						$(this).insertBefore(first);
+					}
+					keys.unshift(event.data.key);
+				}
+				loaded++;
+				if (loaded == added) {
+					stopped = true;
+					clearTimeout(timer);
+					start();
+				}
+			})
+			.on('mouseover', {title: content[key]['title'], author: content[key]['author'], body: strip(content[key]['body'])}, function(event) {
+				$('#popup').html('<b>' + event.data.title + '</b> by <b>@' + event.data.author + '</b><br><br>' + event.data.body.substring(0, 140) + 
+					(event.data.body.length > 140 ? ' . . .' : ''));
+				if (event.pageX + $('#popup').width() > $('.Collage').width()) {
+					left = $('.Collage').width() - $('#popup').width()
+				} else {
+					left = event.pageX + 1;
+				}
+				$('#popup').css({left: left, top: event.pageY + 1});
+				$('#popup').show();
+				$(this).css('border-color', '#1a509a');
+			})
+			.on('mouseout', function() {
+				$('#popup').hide();
+				$(this).css('border-color', '#4ba2f2');
+			})
+			.on('click', {url: content[key]['url']}, function(event) {
+				window.open('https://steemit.com' + event.data.url);
+			});
+	}
+}
+
+$(document).ready(function() {
+	var key;
+	var params;
+	
+	params = parameters();
+	if (!params.cat) {
+		document.title += ': new stories';
+	} else {
+		document.title += ': new ' + params.cat + ' stories';
+		index += '/' + params.cat;
+	}
+	
+	spinner = new Spinner({color: '#4ba2f2'}).spin();
+	$('.Collage').append(spinner.el)
+	steem.getState(index, function(err, result) {
+		for (key in result.content) {
+			addStory(key, result.content);
+		}
+			
+		timer = setTimeout(function() {
+			start();
+		}, 5000);
+	});
+});
+
+$(window).bind('resize', function() {
+	$('.Collage').css("opacity", 0);
+	if (resizeTimer) {
+		clearTimeout(resizeTimer);
+	}
+    resizeTimer = setTimeout(collage, 200);
+});
+//]]>
+</script>
+</head>
+<body style="background-color: #1a509a">
+<div class="Collage">
+</div>
+<div id="popup">
+</div>
+</body>
