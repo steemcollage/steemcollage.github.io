@@ -74,6 +74,7 @@ function check() {
 }
 
 function start() {
+	stopped = true;
 	spinner.stop();
 	collage();
 	
@@ -106,7 +107,6 @@ function addStory(key, content) {
 				}
 				loaded++;
 				if (loaded == added) {
-					stopped = true;
 					clearTimeout(timer);
 					start();
 				}
@@ -122,10 +122,12 @@ function addStory(key, content) {
 				$('#popup').css({left: left, top: event.pageY + 1});
 				$('#popup').show();
 				$(this).css('border-color', '#1a509a');
+				event.preventDefault();
 			})
-			.on('mouseout', function() {
+			.on('mouseout', function(event) {
 				$('#popup').hide();
 				$(this).css('border-color', '#4ba2f2');
+				event.preventDefault();
 			})
 			.on('click', {url: content[key]['url']}, function(event) {
 				window.open('https://steemit.com' + event.data.url);
