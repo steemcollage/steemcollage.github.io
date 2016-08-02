@@ -65,12 +65,14 @@ function check() {
 				addStory(key, result.content);
 			}
 		}
+		
+		if (added > 0) {
+			clearInterval(timer);
+			timer = setTimeout(function() {
+				start();
+			}, 5000);
+		}
 	});
-	
-	if (loaded > 0) {
-		clearInterval(timer);
-		start();
-	}
 }
 
 function start() {
