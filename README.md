@@ -2,6 +2,6 @@ SteemCollage is a web app that displays new Steem stories by their images. As st
 
 To watch all new Steem stories, enter: http://steemcollage.github.io
 
-To watch new stories for a particular category, enter: http://steemcollage.github.io?cat=[cat] For example, http://steemcollage.github.io?cat=steemit.
+To watch new stories for a particular category, enter: http://steemcollage.github.io?cat=[cat]. For example, http://steemcollage.github.io?cat=steemit.
 
-The software uses SteemJS by @Fabien.
+The software uses SteemJS by @fabien.
