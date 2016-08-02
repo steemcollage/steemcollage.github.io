@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="description" content="Real-time collage of new Steemit stories.">
+<meta name="description" content="(Near) real-time collage of new Steemit stories.">
 <title>SteemCollage by @pabitel (beta)</title>
 
 <link href="style.css" rel="stylesheet" type="text/css" />
@@ -82,7 +82,7 @@ function start() {
 	
 	added = loaded = 0;
 	
-	timer = setInterval(check, 30000);
+	timer = setInterval(check, 180000);
 }
 
 function addStory(key, content) {
@@ -90,6 +90,7 @@ function addStory(key, content) {
 	var img;
 	var first;
 	var left;
+	var top;
 	
 	try {
 		obj = JSON.parse(content[key]['json_metadata']);
@@ -98,7 +99,7 @@ function addStory(key, content) {
 		added++;
 		img = $("<img />").attr('src', obj.image[0])
 			.on('load', {key: key}, function(event) {
-				if (!stopped && this.complete && typeof this.naturalWidth != "undefined" && this.naturalWidth != 0) {
+				if (!stopped && this.complete && typeof this.naturalWidth != "undefined" && this.naturalWidth != 0 && keys.indexOf(key) == -1) {
 					first = $('.Collage').find('img:first');
 					if (first.length == 0) {
 						$('.Collage').append(this);
@@ -121,7 +122,12 @@ function addStory(key, content) {
 				} else {
 					left = event.pageX + 1;
 				}
-				$('#popup').css({left: left, top: event.pageY + 1});
+				if (event.pageY + $('#popup').height() > $('.Collage').height()) {
+					top = $('.Collage').height() - $('#popup').height()
+				} else {
+					top = event.pageY + 1;
+				}
+				$('#popup').css({left: left, top: top});
 				$('#popup').show();
 				$(this).css('border-color', '#1a509a');
 				event.preventDefault();
